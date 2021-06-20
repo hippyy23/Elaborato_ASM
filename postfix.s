@@ -4,7 +4,7 @@ invalid_str:
     .ascii "Invalid"
 
 num:
-    .long 1337
+    .long
 
 .text
     .global postfix
