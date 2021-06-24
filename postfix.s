@@ -17,37 +17,37 @@ postfix:
     pushl %ecx
     pushl %edx
 
-    movl 8(%ebp), %edx # edx contiene la stringa di input
-    subl $4, %esp # creo uno spazio per il flag (per vedere il contenuto del flag utilizzare "-16(%ebp)")
+    movl 8(%ebp), %edx  # edx contiene la stringa di input
+    subl $4, %esp       # creo uno spazio per il flag (per vedere il contenuto utilizzare "-16(%ebp)")
     movl $0, -16(%ebp)
-    subl $4, %esp # creo uno spazio per il puntatore (offset) ad ogni carattere (per vedere il contenuto del flag utilizzare "-20(%ebp)")
+    subl $4, %esp       # creo uno spazio per il puntatore (offset) ad ogni carattere (per vedere il contenuto utilizzare "-20(%ebp)")
     movl $0, -20(%ebp)
 
-    lea num, %esi
+    lea num, %esi       # carico l'indirizzo della var num in esi
 
-    xorl %ecx, %ecx # azzerro ecx, contatore per la stringa
-    xorl %eax, %eax # azzerro eax, contiene un carattere della stringa (in ogni istante)
+    xorl %ecx, %ecx     # azzerro ecx, contatore per la stringa
+    xorl %eax, %eax     # azzerro eax, contiene un carattere della stringa (in ogni istante)
 
 control:
     movl -20(%ebp), %ebx
     movb (%ebx, %edx), %al
 
-    testb %al, %al # cmp $0, %al
+    testb %al, %al      # cmp $0, %al
     jz store_prep
 
-    cmp $32, %al # controllo dello spazio (32)
-    je prep
+    cmp $32, %al        # controllo dello spazio (32)
+    je conv_prep
 
-    cmp $43, %al # contollo del + (43)
+    cmp $43, %al        # contollo del + (43)
     je sum
 
-    cmp $45, %al # contollo del - (45)
+    cmp $45, %al        # contollo del - (45)
     je check_symb
 
-    cmp $42, %al # contollo del * (42)
+    cmp $42, %al        # contollo del * (42)
     je multiplication
 
-    cmp $47, %al # contollo del / (47)
+    cmp $47, %al        # contollo del / (47)
     je division
 
     # Le cifre vanno da 48-57 (compresi)
@@ -56,23 +56,23 @@ control:
     cmp $57, %al
     jg invalid_prep
 
-    movb %al, (%ecx, %esi, 1) # caricamento del carattere nella var
-    inc %ecx # incremento del contatore (lunghezza di ogni numero)
+    movb %al, (%ecx, %esi, 1)   # caricamento del carattere nella var
+    inc %ecx                    # incremento del contatore (lunghezza di ogni numero)
     addl $1, -20(%ebp)
 
     jmp control
 
 invalid_prep:
-    xorl %ebx, %ebx # funge da offset per la stringa
-    movl $7, %ecx # lunghezza della stringa "Invalid"
-    movl 12(%ebp), %edi # carico l'indirizzo di output in edi (registro destinazione)
-    lea invalid_str, %esi # carico l'indirizzo della stringa "Invalid" in esi (registro sorgente)
+    xorl %ebx, %ebx         # funge da offset per la stringa
+    movl $7, %ecx           # lunghezza della stringa "Invalid"
+    movl 12(%ebp), %edi     # carico l'indirizzo di output in edi (registro destinazione)
+    lea invalid_str, %esi   # carico l'indirizzo della stringa "Invalid" in esi (registro sorgente)
 
     jmp invalid
 
 invalid:
-    movb (%esi, %ebx), %al # carico ogni carattere della stringa "Invalid" in eax
-    movb %al, (%edi, %ebx) # carico ogni carattere nella stringa di output
+    movb (%esi, %ebx), %al  # carico ogni carattere della stringa "Invalid" in eax
+    movb %al, (%edi, %ebx)  # carico ogni carattere nella stringa di output
     inc %ebx
 
     loop invalid
@@ -80,9 +80,9 @@ invalid:
 
     jmp end
 
-prep:
-    pushl %edx # salvo lo stato di edx (che contiene l'input)
-    pushl %esi # salvo il puntatore al primo carattere (sara' modificato in seguito)
+conv_prep:
+    pushl %edx  # salvo lo stato di edx (che contiene l'input)
+    pushl %esi  # salvo il puntatore al primo carattere (sara' modificato in seguito)
 
     movl $10, %ebx
     xorl %edx, %edx
@@ -103,34 +103,34 @@ conv_to_int:
     jmp push_num
 
 push_num:
-    popl %esi # riporto esi allo stato iniziale
-    popl %edx # riporto edx allo stato iniziale
-    addl $1, -20(%ebp) # per saltare il carattere (spazio -> 32)
+    popl %esi               # riporto esi allo stato iniziale
+    popl %edx               # riporto edx allo stato iniziale
+    addl $1, -20(%ebp)      # per saltare il carattere (spazio -> 32)
 
     cmp $1, -16(%ebp)
-    je neg_val
+    je push_neg_val
 
-    pushl %eax # salvo il numero sullo stack
+    pushl %eax              # salvo il numero sullo stack
     xorl %eax, %eax
     xorl %ecx, %ecx
 
     jmp control
 
-neg_val:
+push_neg_val:
     not %eax
     inc %eax
     pushl %eax
 
     xorl %eax, %eax
     xorl %ecx, %ecx
-    movl $0, -16(%ebp) # riporto il flag a 0
+    movl $0, -16(%ebp)  # riporto il flag a 0
 
     jmp control
     
 check_symb:
     addl $1, -20(%ebp)
     movl -20(%ebp), %ebx
-    movb (%ebx, %edx), %al # guardo il prossimo carattere per controllare se e' un numero, uno spazio o un carattere non valido
+    movb (%ebx, %edx), %al   # guardo il prossimo carattere per controllare se e' un numero, uno spazio o un carattere non valido
 
     cmp $32, %al
     je subtraction
@@ -143,7 +143,7 @@ check_symb:
     cmp $57, %al
     jg invalid_prep
 
-    movl $1, -16(%ebp) # flag impostato a 1
+    movl $1, -16(%ebp)      # flag impostato a 1
 
     jmp control
 
@@ -190,11 +190,11 @@ division:
 check_next:
     xorl %eax, %eax
 
-    movl 8(%ebp), %edx # riporto l'indirizzo di input in edx
+    movl 8(%ebp), %edx      # riporto l'indirizzo di input in edx
     movl -20(%ebp), %ebx
 
     movb (%ebx, %edx), %al
-    testb %al, %al # controllo se la stringa e' finita
+    testb %al, %al          # controllo se la stringa e' finita
     jz store_prep
 
     # Le cifre vanno da 48-57 (compresi)
@@ -213,10 +213,10 @@ to_cntrl:
     jmp control
 
 store_prep:
-    popl %eax # risultato
+    popl %eax               # risultato
     xorl %ecx, %ecx
     xorl %ebx, %ebx
-    movl 12(%ebp), %edi # carico l'indirizzo di output in edi (registro destinazione)
+    movl 12(%ebp), %edi     # carico l'indirizzo di output in edi (registro destinazione)
 
     cmp $0, %eax
     jl store_prep_neg
