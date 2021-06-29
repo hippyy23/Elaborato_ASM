@@ -81,6 +81,16 @@ invalid:
     jmp end
 
 conv_prep:
+    cmp $0, -20(%ebp)
+    je invalid_prep
+
+    addl $1, -20(%ebp)
+    movl -20(%ebp), %ebx
+    movb (%ebx, %edx), %al
+    cmp $32, %al
+    je invalid_prep
+    subl $1, -20(%ebp)
+
     pushl %edx  # salvo lo stato di edx (che contiene l'input)
     pushl %esi  # salvo il puntatore al primo carattere (sara' modificato in seguito)
 
@@ -210,6 +220,12 @@ check_next:
 
 to_cntrl:
     addl $1, -20(%ebp)
+    movl -20(%ebp), %ebx
+    movb (%ebx, %edx), %al
+    cmp $32, %al
+    je invalid_prep
+    cmp $0, %al
+    je invalid_prep
     jmp control
 
 store_prep:
